@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { mainNav } from "@/data/mock";
+import { mainNav as defaultNav } from "@/data/mock";
+import type { NavItem } from "@/lib/types";
 import { Logo } from "./Logo";
 import { UtilityNav } from "./UtilityNav";
 
-export function Header() {
+type HeaderProps = {
+  navItems?: NavItem[];
+};
+
+export function Header({ navItems = defaultNav }: HeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -46,7 +51,7 @@ export function Header() {
             } md:flex w-full md:w-auto flex-col md:flex-row md:items-center`}
           >
             <ul className="flex flex-col md:flex-row md:items-stretch">
-              {mainNav.map((item) => {
+              {navItems.map((item) => {
                 const active =
                   item.href === "/"
                     ? pathname === "/"

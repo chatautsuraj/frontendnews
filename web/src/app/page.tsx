@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AdBanner } from "@/components/AdBanner";
 import { DarkCardGrid } from "@/components/DarkCardGrid";
 import { HeadlineStory } from "@/components/HeadlineStory";
@@ -7,13 +8,21 @@ import { articles as mockArticles, videos } from "@/data/mock";
 import { getApiConfig, getPublicFeed, getPublicHomepage } from "@/lib/api";
 import type { Article } from "@/lib/types";
 
-async function loadHomeArticles(): Promise<Article[]> {
+type HomeData = {
+  articles: Article[];
+  source: "api" | "mock";
+  emptyLive: boolean;
+};
+
+async function loadHomeArticles(): Promise<HomeData> {
   const { hasPortalKey } = getApiConfig();
-  if (!hasPortalKey) return mockArticles;
+  if (!hasPortalKey) {
+    return { articles: mockArticles, source: "mock", emptyLive: false };
+  }
 
   try {
     const homepage = await getPublicHomepage();
-    const fromSections = homepage.sections.flatMap((section) =>
+    const fromSections: Article[] = homepage.sections.flatMap((section) =>
       section.items.map((item) => ({
         id: item.id,
         title: item.title,
@@ -34,19 +43,55 @@ async function loadHomeArticles(): Promise<Article[]> {
       })),
     );
 
-    if (fromSections.length >= 5) return fromSections;
+    if (fromSections.length) {
+      return { articles: fromSections, source: "api", emptyLive: false };
+    }
 
     const feed = await getPublicFeed({ limit: 20 });
-    return feed.items.length ? feed.items : mockArticles;
+    if (feed.items.length) {
+      return { articles: feed.items, source: "api", emptyLive: false };
+    }
+
+    return { articles: [], source: "api", emptyLive: true };
   } catch {
-    return mockArticles;
+    return { articles: mockArticles, source: "mock", emptyLive: false };
   }
 }
 
 export default async function Home() {
-  const articles = await loadHomeArticles();
-  const [h1, h2, f1, f2, f3, ...rest] = articles;
+  const { articles, emptyLive } = await loadHomeArticles();
 
+  if (emptyLive) {
+    return (
+      <div className="container-xl px-2 md:px-0 mt-10 mb-16 text-center">
+        <h1 className="font-display text-4xl md:text-5xl font-bold text-primary">
+          The Nagarik
+        </h1>
+        <p className="mt-4 text-lg text-muted">
+          API connected for <strong>thenagarik.com</strong>. No published articles yet.
+        </p>
+        <p className="mt-2 text-muted">
+          Publish stories in Editorial CMS to see them here.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/category/sports"
+            className="rounded-md bg-primary text-white px-4 py-2 font-semibold"
+          >
+            Sports
+          </Link>
+          <Link
+            href="/about"
+            className="rounded-md border border-line px-4 py-2 font-semibold"
+          >
+            About
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const [h1, h2, f1, f2, f3, ...rest] = articles;
   const bySlug = (slug: string) =>
     articles.filter((a) => a.category.slug === slug).concat(rest);
 

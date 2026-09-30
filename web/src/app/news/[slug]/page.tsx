@@ -2,19 +2,56 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdBanner } from "@/components/AdBanner";
-import { articles, getArticle, getRelated } from "@/data/mock";
+import { articles as mockArticles, getArticle, getRelated } from "@/data/mock";
+import { getApiConfig, getPublicArticle, getPublicFeed } from "@/lib/api";
+import type { Article } from "@/lib/types";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
+  return mockArticles.map((article) => ({ slug: article.slug }));
+}
+
+async function resolveArticle(slug: string): Promise<Article | null> {
+  const { hasPortalKey } = getApiConfig();
+  if (hasPortalKey) {
+    try {
+      const live = await getPublicArticle(slug);
+      if (live) return live;
+    } catch {
+      // fall through
+    }
+  }
+  return getArticle(slug) ?? null;
+}
+
+async function resolveSidebar(slug: string): Promise<{ related: Article[]; latest: Article[] }> {
+  const { hasPortalKey } = getApiConfig();
+  if (hasPortalKey) {
+    try {
+      const feed = await getPublicFeed({ limit: 10 });
+      const others = feed.items.filter((a) => a.slug !== slug);
+      return {
+        related: others.slice(0, 5),
+        latest: others.slice(0, 6),
+      };
+    } catch {
+      // fall through
+    }
+  }
+  return {
+    related: getRelated(slug, 5),
+    latest: mockArticles.filter((a) => a.slug !== slug).slice(0, 6),
+  };
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await resolveArticle(slug);
   return {
     title: article ? `${article.title} | The Nagarik` : "समाचार",
   };
@@ -22,11 +59,10 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await resolveArticle(slug);
   if (!article) notFound();
 
-  const related = getRelated(slug, 5);
-  const latest = articles.filter((a) => a.slug !== slug).slice(0, 6);
+  const { related, latest } = await resolveSidebar(slug);
 
   return (
     <div className="container-xl px-2 md:px-0 mt-6">
@@ -86,43 +122,51 @@ export default async function ArticlePage({ params }: PageProps) {
 
           <section className="mt-8">
             <h2 className="font-display text-3xl font-bold mb-4">सम्बन्धित समाचार</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {related.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/news/${item.slug}`}
-                  className="group flex gap-3 border border-line p-2 rounded-sm"
-                >
-                  <Image
-                    src={item.image}
-                    alt={item.imageAlt}
-                    width={160}
-                    height={100}
-                    className="w-28 h-20 object-cover rounded-sm"
-                  />
-                  <span className="story-title font-semibold leading-snug line-clamp-3">
-                    {item.title}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            {related.length === 0 ? (
+              <p className="text-muted">सम्बन्धित समाचार उपलब्ध छैन।</p>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {related.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/news/${item.slug}`}
+                    className="group flex gap-3 border border-line p-2 rounded-sm"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.imageAlt}
+                      width={160}
+                      height={100}
+                      className="w-28 h-20 object-cover rounded-sm"
+                    />
+                    <span className="story-title font-semibold leading-snug line-clamp-3">
+                      {item.title}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         </article>
 
         <aside className="lg:col-span-4 lg:border-l lg:border-line lg:pl-6">
           <h2 className="font-display text-2xl font-bold mb-3">ताजा समाचार</h2>
-          <ul className="divide-y divide-line">
-            {latest.map((item) => (
-              <li key={item.id} className="py-3">
-                <Link
-                  href={`/news/${item.slug}`}
-                  className="story-title font-semibold leading-snug line-clamp-3"
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {latest.length === 0 ? (
+            <p className="text-muted text-sm">अहिले ताजा समाचार छैन।</p>
+          ) : (
+            <ul className="divide-y divide-line">
+              {latest.map((item) => (
+                <li key={item.id} className="py-3">
+                  <Link
+                    href={`/news/${item.slug}`}
+                    className="story-title font-semibold leading-snug line-clamp-3"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <h2 className="font-display text-2xl font-bold mt-8 mb-3 flex items-center gap-2">
             <svg className="size-5 text-accent-orange" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -130,18 +174,22 @@ export default async function ArticlePage({ params }: PageProps) {
             </svg>
             चर्चित समाचार
           </h2>
-          <ul className="divide-y divide-line border-l-2 border-primary pl-3">
-            {related.map((item) => (
-              <li key={`trend-${item.id}`} className="py-3">
-                <Link
-                  href={`/news/${item.slug}`}
-                  className="story-title font-semibold leading-snug line-clamp-3"
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {related.length === 0 ? (
+            <p className="text-muted text-sm">अहिले चर्चित समाचार छैन।</p>
+          ) : (
+            <ul className="divide-y divide-line border-l-2 border-primary pl-3">
+              {related.map((item) => (
+                <li key={`trend-${item.id}`} className="py-3">
+                  <Link
+                    href={`/news/${item.slug}`}
+                    className="story-title font-semibold leading-snug line-clamp-3"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </aside>
       </div>
     </div>
