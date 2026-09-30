@@ -1,12 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  articles as mockArticles,
-  getArticlesByCategory,
-  getCategory,
-} from "@/data/mock";
-import { getApiConfig, getPublicCategories, getPublicFeed } from "@/lib/api";
+import { getPublicCategories, getPublicFeed } from "@/lib/api";
 import {
   isLocale,
   publicCategorySlug,
@@ -24,43 +19,23 @@ type PageProps = {
 
 async function resolveCategory(slug: string): Promise<Category | null> {
   const apiSlug = resolveCategorySlug(slug);
-  const { hasPortalKey } = getApiConfig();
+  const live = await getPublicCategories();
+  const found = live.find(
+    (c) => c.slug === apiSlug || c.slug === slug || publicCategorySlug(c.slug) === slug,
+  );
+  if (!found) return null;
 
-  if (hasPortalKey) {
-    try {
-      const live = await getPublicCategories();
-      const found = live.find(
-        (c) => c.slug === apiSlug || c.slug === slug || publicCategorySlug(c.slug) === slug,
-      );
-      if (found) {
-        return {
-          ...found,
-          // Keep public slug in URL-facing fields when aliased
-          slug: publicCategorySlug(found.slug) === slug ? slug : found.slug,
-          name: found.name === "Sports" && slug === "khel" ? "खेल" : found.name,
-        };
-      }
-    } catch {
-      // fall through
-    }
-  }
-
-  return getCategory(apiSlug) ?? getCategory(slug) ?? null;
+  return {
+    ...found,
+    // Keep public slug in URL-facing fields when aliased
+    slug: publicCategorySlug(found.slug) === slug ? slug : found.slug,
+    name: found.name === "Sports" && slug === "khel" ? "खेल" : found.name,
+  };
 }
 
 async function resolveArticles(slug: string): Promise<Article[]> {
-  const { hasPortalKey } = getApiConfig();
-  if (hasPortalKey) {
-    try {
-      const feed = await getPublicFeed({ category: slug, limit: 30 });
-      return feed.items;
-    } catch (error) {
-      console.error("public feed failed", slug, error);
-    }
-  }
-  const apiSlug = resolveCategorySlug(slug);
-  const items = getArticlesByCategory(apiSlug);
-  return items.length ? items : mockArticles.slice(0, 8);
+  const feed = await getPublicFeed({ category: slug, limit: 30 });
+  return feed.items;
 }
 
 export async function generateMetadata({ params }: PageProps) {

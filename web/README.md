@@ -1,6 +1,8 @@
 # The Nagarik Frontend
 
-Kalopati-inspired public news UI for **The Nagarik** / **द नागरिक** (`thenagarik.com`).
+Kalopati-inspired public news UI for **The Nagarik** / **द नागरिक**.
+
+This app is frontend-only: every category, homepage, and article page loads data from the multi-tenant newsportal API. There is no CMS in this repo.
 
 ## Setup
 
@@ -13,11 +15,15 @@ npm install
 npm run dev
 ```
 
+Open `http://localhost:3000/en/khel` — that route calls:
+
+`GET /v1/public/feed?category=sports` with `X-Forwarded-Host` + `X-Portal-Key`.
+
 ## Routes
 
-- `/{locale}` — home (`ne` / `en`)
-- `/{locale}/{category}` — category feed (e.g. `/en/khel`)
-- `/{locale}/{category}/{slug}` — article
+- `/{locale}` — home (`ne` / `en`) via `/public/homepage` (+ `/public/feed` fallback)
+- `/{locale}/{category}` — category feed (e.g. `/en/khel`) via `/public/feed`
+- `/{locale}/{category}/{slug}` — article via `/public/articles/:slug`
 
 `khel` maps to API category slug `sports`.
 
@@ -26,8 +32,6 @@ npm run dev
 - Base: `https://newsportalapi.ekaartech.com/v1`
 - Docs: https://newsportalapi.ekaartech.com/api
 - Public routes only (`/public/*`)
+- Tenant: `X-Forwarded-Host: thenagarik.com`
+- Auth: `X-Portal-Key`
 - Media proxy: `/api/media/[id]/full`
-
-## Deploy note
-
-`www.thenagarik.com` currently serves a **different** Payload/Next app (`the-nagarik.vercel.app`), not this repo. Point that domain/Vercel project at **this** frontend for `/en/khel` to hit newsportalapi.

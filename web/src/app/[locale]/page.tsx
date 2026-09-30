@@ -4,8 +4,8 @@ import { DarkCardGrid } from "@/components/DarkCardGrid";
 import { HeadlineStory } from "@/components/HeadlineStory";
 import { LightCategorySection } from "@/components/LightCategorySection";
 import { VideoSection } from "@/components/VideoSection";
-import { articles as mockArticles, videos } from "@/data/mock";
-import { getApiConfig, getPublicFeed, getPublicHomepage } from "@/lib/api";
+import { videos } from "@/data/mock";
+import { getPublicFeed, getPublicHomepage } from "@/lib/api";
 import { isLocale, type Locale } from "@/lib/locale";
 import { categoryHref, pageHref } from "@/lib/paths";
 import type { Article } from "@/lib/types";
@@ -13,53 +13,47 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+const FALLBACK_IMAGE =
+  "https://picsum.photos/seed/nagarik-fallback/1400/788";
+
 type HomeData = {
   articles: Article[];
   emptyLive: boolean;
 };
 
 async function loadHomeArticles(): Promise<HomeData> {
-  const { hasPortalKey } = getApiConfig();
-  if (!hasPortalKey) {
-    return { articles: mockArticles, emptyLive: false };
+  const homepage = await getPublicHomepage();
+  const fromSections: Article[] = homepage.sections.flatMap((section) =>
+    section.items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      excerpt: item.title,
+      body: [item.title],
+      publishedAt: item.publishedAt,
+      category: item.category ?? {
+        id: "uncat",
+        name: "समाचार",
+        slug: "samachar",
+      },
+      author: "The Nagarik",
+      image: item.featuredMedia
+        ? `/api/media/${item.featuredMedia.id}/full`
+        : FALLBACK_IMAGE,
+      imageAlt: item.title,
+    })),
+  );
+
+  if (fromSections.length) {
+    return { articles: fromSections, emptyLive: false };
   }
 
-  try {
-    const homepage = await getPublicHomepage();
-    const fromSections: Article[] = homepage.sections.flatMap((section) =>
-      section.items.map((item) => ({
-        id: item.id,
-        title: item.title,
-        slug: item.slug,
-        excerpt: item.title,
-        body: [item.title],
-        publishedAt: item.publishedAt,
-        category: item.category ?? {
-          id: "uncat",
-          name: "समाचार",
-          slug: "samachar",
-        },
-        author: "The Nagarik",
-        image: item.featuredMedia
-          ? `/api/media/${item.featuredMedia.id}/full`
-          : mockArticles[0].image,
-        imageAlt: item.title,
-      })),
-    );
-
-    if (fromSections.length) {
-      return { articles: fromSections, emptyLive: false };
-    }
-
-    const feed = await getPublicFeed({ limit: 20 });
-    if (feed.items.length) {
-      return { articles: feed.items, emptyLive: false };
-    }
-
-    return { articles: [], emptyLive: true };
-  } catch {
-    return { articles: mockArticles, emptyLive: false };
+  const feed = await getPublicFeed({ limit: 20 });
+  if (feed.items.length) {
+    return { articles: feed.items, emptyLive: false };
   }
+
+  return { articles: [], emptyLive: true };
 }
 
 export default async function LocaleHomePage({

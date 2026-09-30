@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdBanner } from "@/components/AdBanner";
-import { articles as mockArticles, getArticle, getRelated } from "@/data/mock";
-import { getApiConfig, getPublicArticle, getPublicFeed } from "@/lib/api";
+import { getPublicArticle, getPublicFeed } from "@/lib/api";
 import { isLocale, type Locale } from "@/lib/locale";
 import { articleHref, categoryHref } from "@/lib/paths";
 import type { Article } from "@/lib/types";
@@ -15,35 +14,15 @@ type PageProps = {
 };
 
 async function resolveArticle(slug: string): Promise<Article | null> {
-  const { hasPortalKey } = getApiConfig();
-  if (hasPortalKey) {
-    try {
-      const live = await getPublicArticle(slug);
-      if (live) return live;
-    } catch {
-      // fall through
-    }
-  }
-  return getArticle(slug) ?? null;
+  return getPublicArticle(slug);
 }
 
 async function resolveSidebar(slug: string): Promise<{ related: Article[]; latest: Article[] }> {
-  const { hasPortalKey } = getApiConfig();
-  if (hasPortalKey) {
-    try {
-      const feed = await getPublicFeed({ limit: 10 });
-      const others = feed.items.filter((a) => a.slug !== slug);
-      return {
-        related: others.slice(0, 5),
-        latest: others.slice(0, 6),
-      };
-    } catch {
-      // fall through
-    }
-  }
+  const feed = await getPublicFeed({ limit: 10 });
+  const others = feed.items.filter((a) => a.slug !== slug);
   return {
-    related: getRelated(slug, 5),
-    latest: mockArticles.filter((a) => a.slug !== slug).slice(0, 6),
+    related: others.slice(0, 5),
+    latest: others.slice(0, 6),
   };
 }
 
