@@ -17,8 +17,8 @@ const khand = Khand({
 });
 
 export const metadata: Metadata = {
-  title: `${site.nameEn} :: Nepal's Premium news portal`,
-  description: `${site.name} — ${site.tagline}. Frontend clone with mock data.`,
+  title: `${site.nameEn} :: Nepal's news portal`,
+  description: `${site.nameEn} (${site.name}) — ${site.tagline}`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -4,25 +4,31 @@ import { Logo } from "./Logo";
 
 const linkGroups = [
   {
-    title: "Advertise with Kalopati",
+    title: "लिंकहरू",
     items: [
-      "Ad Board Reg. : 0642/2082/83/01",
-      `Email : ${site.email}`,
-      `Contact : ${site.phone}`,
-      "Advertisement Tariff",
+      { label: "हाम्रो बारेमा", href: "#" },
+      { label: "सम्पर्क", href: "#" },
+      { label: "गोपनीयता नीति", href: "#" },
+      { label: "सम्पादकीय नीति", href: "#" },
     ],
   },
   {
-    title: "कालोपाटी लिंक्स",
-    items: ["हाम्रो बारेमा", "सम्पर्क", "गोपनीयता नीति", "सम्पादकीय नीति", "विज्ञापन नीति"],
+    title: "श्रेणीहरू",
+    items: [
+      { label: "समाचार", href: "/category/samachar" },
+      { label: "देश चर्चा", href: "/category/desh-charcha" },
+      { label: "कर्पोरेट वाच", href: "/category/corporate" },
+      { label: "सिने संसार", href: "/category/cinema" },
+    ],
   },
   {
-    title: "कालोपाटी इन्फोलाइन",
-    items: ["निर्देशक", "मल्टिमिडिया संयोजक", "प्रधान सम्पादक", "समाचार संयोजक"],
-  },
-  {
-    title: "थप जानकारी",
-    items: ["जेन-जी सहिद सूची", "API Documentation", "प्रेस काउन्सिल दर्ता"],
+    title: "थप",
+    items: [
+      { label: "स्पोर्ट्स", href: "/category/sports" },
+      { label: "हेल्थ", href: "/category/health" },
+      { label: "कला", href: "/category/entertainment" },
+      { label: "एक्सप्लेनर", href: "/category/explainer" },
+    ],
   },
 ];
 
@@ -62,15 +68,15 @@ export function Footer() {
       </div>
 
       <div className="container-xl px-4 pb-8 pt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {linkGroups.map((group) => (
             <div key={group.title}>
               <h3 className="font-display text-xl font-bold mb-3">{group.title}</h3>
               <ul className="space-y-2 text-sm text-white/85">
                 {group.items.map((item) => (
-                  <li key={item}>
-                    <Link href="#" className="hover:text-white transition">
-                      {item}
+                  <li key={item.label}>
+                    <Link href={item.href} className="hover:text-white transition">
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -80,14 +86,16 @@ export function Footer() {
         </div>
 
         <div className="mt-8 rounded-md bg-ternary px-4 py-3 text-sm md:text-base">
-          <strong>सिधा सम्पर्क:</strong> {site.phone} · {site.email}
+          सम्पर्क: {site.phone}
         </div>
       </div>
 
       <div className="border-t border-white/10 text-xs md:text-sm text-white/70">
         <div className="container-xl px-4 py-3 flex flex-col md:flex-row justify-between gap-2 text-center md:text-left">
-          <span>Copyright {new Date().getFullYear()} @ {site.nameEn}.com | All rights reserved</span>
-          <span>Frontend clone for demo — API wiring next</span>
+          <span>
+            Copyright {new Date().getFullYear()} @ {site.nameEn} | All rights reserved
+          </span>
+          <span>{site.nameEn}</span>
         </div>
       </div>
     </footer>

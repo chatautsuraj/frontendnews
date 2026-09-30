@@ -41,7 +41,7 @@ export function AdBanner({ variant = "promo", label }: AdBannerProps) {
     <div className="container-xl my-4">
       <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center">
         <p className="text-lg md:text-xl font-semibold text-primary">
-          कालोपाटीमा अब{" "}
+          खबर स्टोरीजमा अब{" "}
           <span className="text-accent-orange">नेपालको प्रिमियम नेपाली पात्रो</span>
         </p>
         <p className="text-sm text-muted mt-1">{label ?? "Advertisement placeholder"}</p>

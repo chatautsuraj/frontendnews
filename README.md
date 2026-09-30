@@ -1,13 +1,11 @@
 # frontendnews
 
-Multi-tenant news portal **frontend** (API already exists).
+Multi-tenant news portal **frontend** for **Khabar Stories**.
 
 ## App
 
-See [`web/`](./web) — Kalopati-style public news UI with mock data.
+See [`web/`](./web).
 
 ```bash
 cd web && npm install && npm run dev
 ```
-
-API (later): `https://newsportalapi.ekaartech.com`

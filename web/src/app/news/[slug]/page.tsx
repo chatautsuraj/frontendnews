@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const article = getArticle(slug);
   return {
-    title: article ? `${article.title} | कालोपाटी` : "समाचार",
+    title: article ? `${article.title} | Khabar Stories` : "समाचार",
   };
 }
 
@@ -38,7 +38,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
           <div className="mt-4 flex items-center gap-3 text-sm text-muted">
             <span className="size-9 rounded-full bg-gray-200 grid place-items-center font-bold text-primary">
-              का
+              ख
             </span>
             <span className="font-bold text-primary">{article.author}</span>
             <span>·</span>

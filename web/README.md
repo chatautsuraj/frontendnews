@@ -1,12 +1,12 @@
-# News Portal Frontend (Kalopati-style)
+# Khabar Stories Frontend
 
-Public news portal UI inspired by [kalopati.com](https://kalopati.com), built with **Next.js App Router**, **TypeScript**, and **Tailwind CSS**.
+Public news portal UI (Kalopati-inspired layout) for **Khabar Stories**, built with **Next.js App Router**, **TypeScript**, and **Tailwind CSS**.
 
 ## Status
 
 - Layout clone with mock Nepali content (no API connection yet)
+- Brand: Khabar Stories / खबर स्टोरीज
 - Pages: Home, Category (`/category/[slug]`), Article (`/news/[slug]`)
-- Ready to wire later to `https://newsportalapi.ekaartech.com`
 
 ## Develop
 
@@ -17,10 +17,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-## Scripts
-
-- `npm run dev` — local development
-- `npm run build` — production build
-- `npm run start` — serve production build
-- `npm run lint` — ESLint
