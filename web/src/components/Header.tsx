@@ -10,9 +10,10 @@ import { UtilityNav } from "./UtilityNav";
 
 type HeaderProps = {
   navItems?: NavItem[];
+  locale?: string;
 };
 
-export function Header({ navItems = defaultNav }: HeaderProps) {
+export function Header({ navItems = defaultNav, locale = "ne" }: HeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -20,7 +21,7 @@ export function Header({ navItems = defaultNav }: HeaderProps) {
   return (
     <header className="bg-primary text-white">
       <div className="container-xl relative flex flex-col items-center gap-2 px-2 py-5 md:py-6">
-        <Logo />
+        <Logo locale={locale} />
         <button
           type="button"
           aria-label="Toggle theme"
@@ -123,7 +124,7 @@ export function Header({ navItems = defaultNav }: HeaderProps) {
         </div>
       </nav>
 
-      <UtilityNav />
+      <UtilityNav locale={locale} />
     </header>
   );
 }

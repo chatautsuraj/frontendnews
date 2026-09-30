@@ -1,36 +1,39 @@
 import Link from "next/link";
 import { site } from "@/data/mock";
+import { categoryHref, pageHref } from "@/lib/paths";
 import { Logo } from "./Logo";
 
-const linkGroups = [
-  {
-    title: "लिंकहरू",
-    items: [
-      { label: "हाम्रो बारेमा", href: "/about" },
-      { label: "सम्पर्क", href: "/contact" },
-      { label: "गोपनीयता नीति", href: "/privacy" },
-      { label: "सम्पादकीय नीति", href: "/editorial-policy" },
-    ],
-  },
-  {
-    title: "श्रेणीहरू",
-    items: [
-      { label: "समाचार", href: "/category/samachar" },
-      { label: "देश चर्चा", href: "/category/desh-charcha" },
-      { label: "कर्पोरेट वाच", href: "/category/corporate" },
-      { label: "सिने संसार", href: "/category/cinema" },
-    ],
-  },
-  {
-    title: "थप",
-    items: [
-      { label: "स्पोर्ट्स", href: "/category/sports" },
-      { label: "हेल्थ", href: "/category/health" },
-      { label: "कला", href: "/category/entertainment" },
-      { label: "एक्सप्लेनर", href: "/category/explainer" },
-    ],
-  },
-];
+function linkGroups(locale: string) {
+  return [
+    {
+      title: "लिंकहरू",
+      items: [
+        { label: "हाम्रो बारेमा", href: pageHref(locale, "/about") },
+        { label: "सम्पर्क", href: pageHref(locale, "/contact") },
+        { label: "गोपनीयता नीति", href: pageHref(locale, "/privacy") },
+        { label: "सम्पादकीय नीति", href: pageHref(locale, "/editorial-policy") },
+      ],
+    },
+    {
+      title: "श्रेणीहरू",
+      items: [
+        { label: "समाचार", href: categoryHref(locale, "samachar") },
+        { label: "देश चर्चा", href: categoryHref(locale, "desh-charcha") },
+        { label: "कर्पोरेट वाच", href: categoryHref(locale, "corporate") },
+        { label: "खेल", href: categoryHref(locale, "sports") },
+      ],
+    },
+    {
+      title: "थप",
+      items: [
+        { label: "हेल्थ", href: categoryHref(locale, "health") },
+        { label: "कला", href: categoryHref(locale, "entertainment") },
+        { label: "एक्सप्लेनर", href: categoryHref(locale, "explainer") },
+        { label: "सिने संसार", href: categoryHref(locale, "cinema") },
+      ],
+    },
+  ];
+}
 
 const socialLinks = [
   { label: "f", href: "https://www.facebook.com/", name: "Facebook" },
@@ -40,7 +43,7 @@ const socialLinks = [
   { label: "ig", href: "https://www.instagram.com/", name: "Instagram" },
 ];
 
-export function Footer() {
+export function Footer({ locale = "ne" }: { locale?: string }) {
   return (
     <footer className="bg-primary text-white mt-10">
       <div className="bg-secondary border-b border-gray-400">
@@ -49,13 +52,13 @@ export function Footer() {
             <span className="text-sm font-semibold">एप डाउनलोड गर्नुहोस्</span>
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
               <Link
-                href="/app"
+                href={pageHref(locale, "/app")}
                 className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 hover:bg-secondary transition"
               >
                 Google Play
               </Link>
               <Link
-                href="/app"
+                href={pageHref(locale, "/app")}
                 className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 hover:bg-secondary transition"
               >
                 App Store
@@ -81,13 +84,13 @@ export function Footer() {
       </div>
 
       <div className="flex flex-col items-center gap-2 py-6 relative">
-        <Logo variant="footer" />
+        <Logo variant="footer" locale={locale} />
         <span className="absolute -bottom-1 left-0 right-0 mx-auto w-full md:w-64 h-1 bg-gradient-to-r from-transparent via-white to-transparent" />
       </div>
 
       <div className="container-xl px-4 pb-8 pt-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-          {linkGroups.map((group) => (
+          {linkGroups(locale).map((group) => (
             <div key={group.title}>
               <h3 className="font-display text-xl font-bold mb-3">{group.title}</h3>
               <ul className="space-y-2 text-sm text-white/85">

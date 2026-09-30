@@ -13,7 +13,7 @@ export function VideoSection({ items }: VideoSectionProps) {
   return (
     <section className="w-full bg-primary mb-5 text-white">
       <div className="container-xl px-3 md:px-5 py-6">
-        <SectionTitle title="The Nagarik TV" href="/tv" tone="dark" />
+        <SectionTitle title="The Nagarik TV" href="/ne/tv" tone="dark" />
         <div className="grid md:grid-cols-3 gap-2 mt-2">
           <div className="md:col-span-2">
             <Link href={main.href} className="group block p-2">

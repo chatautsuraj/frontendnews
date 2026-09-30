@@ -1,16 +1,18 @@
 import Link from "next/link";
+import { categoryHref, pageHref } from "@/lib/paths";
 
 type AdBannerProps = {
   variant?: "exam" | "election" | "promo";
   label?: string;
+  locale?: string;
 };
 
-export function AdBanner({ variant = "promo", label }: AdBannerProps) {
+export function AdBanner({ variant = "promo", label, locale = "ne" }: AdBannerProps) {
   if (variant === "exam") {
     return (
       <div className="container-xl my-3">
         <Link
-          href="/category/explainer"
+          href={categoryHref(locale, "explainer")}
           className="block rounded-md bg-gradient-to-r from-[#0b3d5c] via-[#126b9e] to-[#0b3d5c] text-white px-4 py-5 md:py-6 text-center shadow-sm hover:opacity-95 transition"
         >
           <p className="font-display text-2xl md:text-3xl font-bold tracking-wide">
@@ -28,7 +30,7 @@ export function AdBanner({ variant = "promo", label }: AdBannerProps) {
     return (
       <div className="container-xl my-3">
         <Link
-          href="/tools/election"
+          href={pageHref(locale, "/tools/election")}
           className="rounded-md bg-accent-blue text-white px-4 py-5 flex flex-col md:flex-row items-center justify-between gap-3 hover:opacity-95 transition"
         >
           <div>
@@ -48,7 +50,7 @@ export function AdBanner({ variant = "promo", label }: AdBannerProps) {
   return (
     <div className="container-xl my-4">
       <Link
-        href="/tools/calendar"
+        href={pageHref(locale, "/tools/calendar")}
         className="block rounded-md border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center hover:bg-white transition"
       >
         <p className="text-lg md:text-xl font-semibold text-primary">

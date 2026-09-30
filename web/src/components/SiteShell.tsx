@@ -1,28 +1,48 @@
-import { getApiConfig, getPublicCategories } from "@/lib/api";
-import type { NavItem } from "@/lib/types";
 import { mainNav as defaultNav } from "@/data/mock";
+import { getApiConfig, getPublicCategories } from "@/lib/api";
+import type { Locale } from "@/lib/locale";
+import { publicCategorySlug, withLocale } from "@/lib/locale";
+import type { NavItem } from "@/lib/types";
+import { BackToTop } from "./BackToTop";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
-import { BackToTop } from "./BackToTop";
 
-async function loadNav(): Promise<NavItem[]> {
+async function loadNav(locale: Locale): Promise<NavItem[]> {
   const { hasPortalKey } = getApiConfig();
-  if (!hasPortalKey) return defaultNav;
+
+  const localize = (items: NavItem[]): NavItem[] =>
+    items.map((item) => ({
+      ...item,
+      href:
+        item.href === "/"
+          ? withLocale(locale)
+          : item.href.startsWith("/category/")
+            ? withLocale(locale, `/${item.href.replace("/category/", "")}`)
+            : item.href.startsWith("/")
+              ? withLocale(locale, item.href)
+              : item.href,
+      children: item.children ? localize(item.children) : undefined,
+    }));
+
+  if (!hasPortalKey) return localize(defaultNav);
 
   try {
     const categories = await getPublicCategories();
-    if (!categories.length) return defaultNav;
+    if (!categories.length) return localize(defaultNav);
 
     const primary = categories.slice(0, 6).map((c) => ({
-      label: c.name,
-      href: `/category/${c.slug}`,
+      label: c.name === "Sports" ? "खेल" : c.name,
+      href: withLocale(locale, `/${publicCategorySlug(c.slug)}`),
     }));
     const more = categories.slice(6).map((c) => ({
       label: c.name,
-      href: `/category/${c.slug}`,
+      href: withLocale(locale, `/${publicCategorySlug(c.slug)}`),
     }));
 
-    const nav: NavItem[] = [{ label: "होमपेज", href: "/" }, ...primary];
+    const nav: NavItem[] = [
+      { label: "होमपेज", href: withLocale(locale) },
+      ...primary,
+    ];
     if (more.length) {
       nav.push({
         label: "अन्य",
@@ -32,20 +52,26 @@ async function loadNav(): Promise<NavItem[]> {
     }
     return nav;
   } catch {
-    return defaultNav;
+    return localize(defaultNav);
   }
 }
 
-export async function SiteShell({ children }: { children: React.ReactNode }) {
-  const navItems = await loadNav();
+export async function SiteShell({
+  locale,
+  children,
+}: {
+  locale: Locale;
+  children: React.ReactNode;
+}) {
+  const navItems = await loadNav(locale);
 
   return (
     <>
-      <Header navItems={navItems} />
+      <Header navItems={navItems} locale={locale} />
       <main id="content" className="flex-1 pb-8">
         {children}
       </main>
-      <Footer />
+      <Footer locale={locale} />
       <BackToTop />
     </>
   );

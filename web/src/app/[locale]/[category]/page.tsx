@@ -3,35 +3,49 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   articles as mockArticles,
-  categories as mockCategories,
   getArticlesByCategory,
   getCategory,
 } from "@/data/mock";
 import { getApiConfig, getPublicCategories, getPublicFeed } from "@/lib/api";
+import {
+  isLocale,
+  publicCategorySlug,
+  resolveCategorySlug,
+  type Locale,
+} from "@/lib/locale";
+import { articleHref } from "@/lib/paths";
 import type { Article, Category } from "@/lib/types";
-
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
 
 export const dynamic = "force-dynamic";
 
-export async function generateStaticParams() {
-  return mockCategories.map((category) => ({ slug: category.slug }));
-}
+type PageProps = {
+  params: Promise<{ locale: string; category: string }>;
+};
 
 async function resolveCategory(slug: string): Promise<Category | null> {
+  const apiSlug = resolveCategorySlug(slug);
   const { hasPortalKey } = getApiConfig();
+
   if (hasPortalKey) {
     try {
       const live = await getPublicCategories();
-      const found = live.find((c) => c.slug === slug);
-      if (found) return found;
+      const found = live.find(
+        (c) => c.slug === apiSlug || c.slug === slug || publicCategorySlug(c.slug) === slug,
+      );
+      if (found) {
+        return {
+          ...found,
+          // Keep public slug in URL-facing fields when aliased
+          slug: publicCategorySlug(found.slug) === slug ? slug : found.slug,
+          name: found.name === "Sports" && slug === "khel" ? "खेल" : found.name,
+        };
+      }
     } catch {
       // fall through
     }
   }
-  return getCategory(slug) ?? null;
+
+  return getCategory(apiSlug) ?? getCategory(slug) ?? null;
 }
 
 async function resolveArticles(slug: string): Promise<Article[]> {
@@ -40,16 +54,17 @@ async function resolveArticles(slug: string): Promise<Article[]> {
     try {
       const feed = await getPublicFeed({ category: slug, limit: 30 });
       return feed.items;
-    } catch {
-      // fall through
+    } catch (error) {
+      console.error("public feed failed", slug, error);
     }
   }
-  const items = getArticlesByCategory(slug);
+  const apiSlug = resolveCategorySlug(slug);
+  const items = getArticlesByCategory(apiSlug);
   return items.length ? items : mockArticles.slice(0, 8);
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params;
+  const { category: slug } = await params;
   const category = await resolveCategory(slug);
   return {
     title: category ? `${category.name} | The Nagarik` : "श्रेणी",
@@ -57,7 +72,10 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function CategoryPage({ params }: PageProps) {
-  const { slug } = await params;
+  const { locale: raw, category: slug } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const category = await resolveCategory(slug);
   if (!category) notFound();
 
@@ -80,7 +98,7 @@ export default async function CategoryPage({ params }: PageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {list.map((article) => (
             <article key={article.id} className="group border border-line p-3 rounded-sm">
-              <Link href={`/news/${article.slug}`} className="block">
+              <Link href={articleHref(locale, article)} className="block">
                 <Image
                   src={article.image}
                   alt={article.imageAlt}
@@ -91,7 +109,7 @@ export default async function CategoryPage({ params }: PageProps) {
               </Link>
               <h2 className="mt-3">
                 <Link
-                  href={`/news/${article.slug}`}
+                  href={articleHref(locale, article)}
                   className="story-title font-bold text-xl md:text-2xl leading-snug line-clamp-3"
                 >
                   {article.title}

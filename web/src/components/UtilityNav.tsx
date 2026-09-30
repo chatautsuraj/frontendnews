@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { utilityLinks } from "@/data/mock";
+import { pageHref } from "@/lib/paths";
 
 function Icon({ kind }: { kind: (typeof utilityLinks)[number]["icon"] }) {
   const common = "size-3.5";
@@ -57,7 +58,7 @@ function Icon({ kind }: { kind: (typeof utilityLinks)[number]["icon"] }) {
   }
 }
 
-export function UtilityNav() {
+export function UtilityNav({ locale = "ne" }: { locale?: string }) {
   return (
     <div className="bg-[#f3f4f6] text-primary border-b border-line">
       <div className="container-xl overflow-x-auto">
@@ -65,7 +66,7 @@ export function UtilityNav() {
           {utilityLinks.map((item) => (
             <li key={item.label}>
               <Link
-                href={item.href}
+                href={pageHref(locale, item.href)}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-white transition"
               >
                 <span className="inline-grid place-items-center size-6 rounded-full bg-primary text-white">

@@ -256,19 +256,19 @@ export const videos: VideoItem[] = [
     id: "v1",
     title: "आजका प्रमुख फिल्मी खबर... || The Nagarik Cinema",
     image: img(201),
-    href: "/news/aajaka-pramukh-filmi-khabar",
+    href: "/ne/cinema/aajaka-pramukh-filmi-khabar",
   },
   {
     id: "v2",
     title: "आजका प्रमुख फिल्मी खबर... || The Nagarik Cinema",
     image: img(202),
-    href: "/category/cinema",
+    href: "/ne/cinema",
   },
   {
     id: "v3",
     title: "आजका प्रमुख फिल्मी खबर... || The Nagarik Cinema",
     image: img(203),
-    href: "/tv",
+    href: "/ne/tv",
   },
 ];
 

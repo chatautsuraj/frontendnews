@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { site } from "@/data/mock";
+import { homeHref } from "@/lib/paths";
 
 type LogoProps = {
   variant?: "header" | "footer";
+  locale?: string;
 };
 
-export function Logo({ variant = "header" }: LogoProps) {
+export function Logo({ variant = "header", locale = "ne" }: LogoProps) {
   const light = variant === "header" || variant === "footer";
 
   return (
-    <Link href="/" className="inline-flex flex-col items-center text-center">
+    <Link href={homeHref(locale)} className="inline-flex flex-col items-center text-center">
       <span
         className={`font-display font-bold tracking-wide leading-none ${
           light ? "text-white" : "text-primary"

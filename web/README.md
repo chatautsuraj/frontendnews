@@ -13,19 +13,21 @@ npm install
 npm run dev
 ```
 
+## Routes
+
+- `/{locale}` — home (`ne` / `en`)
+- `/{locale}/{category}` — category feed (e.g. `/en/khel`)
+- `/{locale}/{category}/{slug}` — article
+
+`khel` maps to API category slug `sports`.
+
 ## API
 
 - Base: `https://newsportalapi.ekaartech.com/v1`
 - Docs: https://newsportalapi.ekaartech.com/api
-- Used routes (public only):
-  - `GET /public/categories`
-  - `GET /public/homepage`
-  - `GET /public/feed`
-  - `GET /public/articles/{slug}`
-  - `GET /public/breaking`
-  - `GET /public/ads`
-  - `GET /public/media/{id}`
-  - `GET /public/ads/{id}/image`
-  - `POST /public/articles/{slug}/views`
+- Public routes only (`/public/*`)
+- Media proxy: `/api/media/[id]/full`
 
-Media/ads are proxied via `/api/media/[id]` and `/api/ads/[id]/image`.
+## Deploy note
+
+`www.thenagarik.com` currently serves a **different** Payload/Next app (`the-nagarik.vercel.app`), not this repo. Point that domain/Vercel project at **this** frontend for `/en/khel` to hit newsportalapi.

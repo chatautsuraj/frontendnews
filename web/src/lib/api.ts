@@ -1,4 +1,5 @@
 import type { Article, Category } from "@/lib/types";
+import { resolveCategorySlug } from "@/lib/locale";
 
 /** API root including version prefix, e.g. https://newsportalapi.ekaartech.com/v1 */
 const API_BASE = (
@@ -92,7 +93,7 @@ async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
       "X-Portal-Key": PORTAL_KEY,
       ...(init?.headers ?? {}),
     },
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -125,7 +126,9 @@ export async function getPublicFeed(opts?: {
   offset?: number;
 }) {
   const params = new URLSearchParams();
-  if (opts?.category) params.set("category", opts.category);
+  if (opts?.category) {
+    params.set("category", resolveCategorySlug(opts.category));
+  }
   if (opts?.date) params.set("date", opts.date);
   if (opts?.limit) params.set("limit", String(opts.limit));
   if (opts?.offset) params.set("offset", String(opts.offset));

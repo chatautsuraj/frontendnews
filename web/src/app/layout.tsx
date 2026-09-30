@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Khand, Mukta } from "next/font/google";
-import { SiteShell } from "@/components/SiteShell";
 import { site } from "@/data/mock";
 import "./globals.css";
 
@@ -25,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ne" className={`${mukta.variable} ${khand.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased bg-background text-foreground">
-        <SiteShell>{children}</SiteShell>
+        {children}
       </body>
     </html>
   );

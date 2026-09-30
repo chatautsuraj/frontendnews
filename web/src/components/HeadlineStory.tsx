@@ -1,18 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
+import { articleHref } from "@/lib/paths";
 import type { Article } from "@/lib/types";
 
 type HeadlineStoryProps = {
   article: Article;
+  locale: string;
   showImage?: boolean;
 };
 
-export function HeadlineStory({ article, showImage = false }: HeadlineStoryProps) {
+export function HeadlineStory({ article, locale, showImage = false }: HeadlineStoryProps) {
+  const href = articleHref(locale, article);
   return (
     <article className="group border border-line p-2 md:p-4">
       <h2 className="entry-title text-center m-0">
         <Link
-          href={`/news/${article.slug}`}
+          href={href}
           className="story-title text-primary font-bold text-[1.85rem] leading-tight md:text-5xl md:leading-[1.2]"
         >
           {article.title}
@@ -27,7 +30,7 @@ export function HeadlineStory({ article, showImage = false }: HeadlineStoryProps
             </span>
             <span className="text-sm font-bold text-gray-600">{article.author}</span>
           </div>
-          <Link href={`/news/${article.slug}`} className="mt-4 block">
+          <Link href={href} className="mt-4 block">
             <Image
               src={article.image}
               alt={article.imageAlt}

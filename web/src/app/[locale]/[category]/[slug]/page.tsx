@@ -4,17 +4,15 @@ import { notFound } from "next/navigation";
 import { AdBanner } from "@/components/AdBanner";
 import { articles as mockArticles, getArticle, getRelated } from "@/data/mock";
 import { getApiConfig, getPublicArticle, getPublicFeed } from "@/lib/api";
+import { isLocale, type Locale } from "@/lib/locale";
+import { articleHref, categoryHref } from "@/lib/paths";
 import type { Article } from "@/lib/types";
-
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
 
 export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
-  return mockArticles.map((article) => ({ slug: article.slug }));
-}
+type PageProps = {
+  params: Promise<{ locale: string; category: string; slug: string }>;
+};
 
 async function resolveArticle(slug: string): Promise<Article | null> {
   const { hasPortalKey } = getApiConfig();
@@ -58,7 +56,10 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ArticlePage({ params }: PageProps) {
-  const { slug } = await params;
+  const { locale: raw, slug } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const article = await resolveArticle(slug);
   if (!article) notFound();
 
@@ -81,7 +82,7 @@ export default async function ArticlePage({ params }: PageProps) {
             <span>{article.publishedAt}</span>
             <span>·</span>
             <Link
-              href={`/category/${article.category.slug}`}
+              href={categoryHref(locale, article.category.slug)}
               className="font-bold text-primary hover:text-secondary"
             >
               {article.category.name}
@@ -118,7 +119,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </div>
           </div>
 
-          <AdBanner variant="promo" label="Article inline ad slot" />
+          <AdBanner variant="promo" locale={locale} label="Article inline ad slot" />
 
           <section className="mt-8">
             <h2 className="font-display text-3xl font-bold mb-4">सम्बन्धित समाचार</h2>
@@ -129,7 +130,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 {related.map((item) => (
                   <Link
                     key={item.id}
-                    href={`/news/${item.slug}`}
+                    href={articleHref(locale, item)}
                     className="group flex gap-3 border border-line p-2 rounded-sm"
                   >
                     <Image
@@ -158,30 +159,7 @@ export default async function ArticlePage({ params }: PageProps) {
               {latest.map((item) => (
                 <li key={item.id} className="py-3">
                   <Link
-                    href={`/news/${item.slug}`}
-                    className="story-title font-semibold leading-snug line-clamp-3"
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h2 className="font-display text-2xl font-bold mt-8 mb-3 flex items-center gap-2">
-            <svg className="size-5 text-accent-orange" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d="M13 2L4 14h6l-1 8 10-14h-6l0-6z" />
-            </svg>
-            चर्चित समाचार
-          </h2>
-          {related.length === 0 ? (
-            <p className="text-muted text-sm">अहिले चर्चित समाचार छैन।</p>
-          ) : (
-            <ul className="divide-y divide-line border-l-2 border-primary pl-3">
-              {related.map((item) => (
-                <li key={`trend-${item.id}`} className="py-3">
-                  <Link
-                    href={`/news/${item.slug}`}
+                    href={articleHref(locale, item)}
                     className="story-title font-semibold leading-snug line-clamp-3"
                   >
                     {item.title}
