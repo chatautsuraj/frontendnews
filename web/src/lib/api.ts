@@ -56,7 +56,7 @@ function mediaUrl(media: PublicMedia | null | undefined): string {
   if (!media?.id) {
     return "https://picsum.photos/seed/nagarik-fallback/1400/788";
   }
-  return `/api/media/${media.id}?size=full`;
+  return `/api/media/${media.id}/full`;
 }
 
 function toArticle(item: PublicArticleSummary, body: string[] = []): Article {

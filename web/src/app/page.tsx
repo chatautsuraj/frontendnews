@@ -39,7 +39,7 @@ async function loadHomeArticles(): Promise<HomeData> {
         },
         author: "The Nagarik",
         image: item.featuredMedia
-          ? `/api/media/${item.featuredMedia.id}?size=full`
+          ? `/api/media/${item.featuredMedia.id}/full`
           : mockArticles[0].image,
         imageAlt: item.title,
       })),

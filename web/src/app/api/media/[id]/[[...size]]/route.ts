@@ -7,7 +7,7 @@ const TENANT_HOST = process.env.NEWS_TENANT_HOST ?? "thenagarik.com";
 const PORTAL_KEY = process.env.NEWS_PORTAL_KEY ?? "";
 
 type RouteContext = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; size?: string[] }>;
 };
 
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -18,8 +18,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const { id } = await context.params;
-  const size = request.nextUrl.searchParams.get("size") ?? "full";
+  const { id, size: sizeParts } = await context.params;
+  const sizeFromPath = sizeParts?.[0];
+  const size =
+    sizeFromPath === "thumb" || sizeFromPath === "full"
+      ? sizeFromPath
+      : (request.nextUrl.searchParams.get("size") ?? "full");
+
   const upstream = `${API_BASE}/public/media/${encodeURIComponent(id)}?size=${encodeURIComponent(size)}`;
 
   const res = await fetch(upstream, {
