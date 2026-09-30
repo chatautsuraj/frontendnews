@@ -8,6 +8,8 @@ import { articles as mockArticles, videos } from "@/data/mock";
 import { getApiConfig, getPublicFeed, getPublicHomepage } from "@/lib/api";
 import type { Article } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 type HomeData = {
   articles: Article[];
   source: "api" | "mock";

@@ -10,7 +10,7 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   if (!PORTAL_KEY) {
     return NextResponse.json(
       { message: "NEWS_PORTAL_KEY is not configured" },
@@ -19,8 +19,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const size = request.nextUrl.searchParams.get("size") ?? "full";
-  const upstream = `${API_BASE}/public/media/${encodeURIComponent(id)}?size=${encodeURIComponent(size)}`;
+  const upstream = `${API_BASE}/public/ads/${encodeURIComponent(id)}/image`;
 
   const res = await fetch(upstream, {
     headers: {
@@ -32,7 +31,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   if (!res.ok) {
     return NextResponse.json(
-      { message: "Failed to load media", upstream, status: res.status },
+      { message: "Failed to load ad image", status: res.status },
       { status: res.status },
     );
   }

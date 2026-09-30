@@ -13,6 +13,9 @@ npm run dev
 
 ## Env
 
-- `NEWS_API_BASE_URL` — default `https://newsportalapi.ekaartech.com`
+- `NEWS_API_BASE_URL` — `https://newsportalapi.ekaartech.com/v1`
 - `NEWS_TENANT_HOST` — `thenagarik.com`
-- `NEWS_PORTAL_KEY` — portal public key for this tenant (required for `/v1/public/*`)
+- `NEWS_PORTAL_KEY` — portal public key for this tenant
+
+Swagger (dev): https://newsportalapi.ekaartech.com/api  
+Frontend uses **public routes only** under `/v1/public/*`.

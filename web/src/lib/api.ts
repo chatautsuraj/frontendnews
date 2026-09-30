@@ -1,7 +1,10 @@
 import type { Article, Category } from "@/lib/types";
 
-const API_BASE =
-  process.env.NEWS_API_BASE_URL ?? "https://newsportalapi.ekaartech.com";
+/** API root including version prefix, e.g. https://newsportalapi.ekaartech.com/v1 */
+const API_BASE = (
+  process.env.NEWS_API_BASE_URL ?? "https://newsportalapi.ekaartech.com/v1"
+).replace(/\/$/, "");
+
 const TENANT_HOST = process.env.NEWS_TENANT_HOST ?? "thenagarik.com";
 const PORTAL_KEY = process.env.NEWS_PORTAL_KEY ?? "";
 
@@ -50,9 +53,10 @@ type PublicHomepage = {
 };
 
 function mediaUrl(media: PublicMedia | null | undefined): string {
-  if (!media?.id) return "https://picsum.photos/seed/nagarik-fallback/1400/788";
-  const size = media.thumbPath ? "full" : "full";
-  return `/api/media/${media.id}?size=${size}`;
+  if (!media?.id) {
+    return "https://picsum.photos/seed/nagarik-fallback/1400/788";
+  }
+  return `/api/media/${media.id}?size=full`;
 }
 
 function toArticle(item: PublicArticleSummary, body: string[] = []): Article {
@@ -70,12 +74,17 @@ function toArticle(item: PublicArticleSummary, body: string[] = []): Article {
   };
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+/** Fetch a public API path (must start with /public/...). */
+async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!path.startsWith("/public/")) {
+    throw new Error(`Only public routes are allowed: ${path}`);
+  }
   if (!PORTAL_KEY) {
     throw new Error("NEWS_PORTAL_KEY is not configured");
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, {
     ...init,
     headers: {
       Accept: "application/json",
@@ -88,32 +97,15 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`API ${path} failed (${res.status}): ${text}`);
+    throw new Error(`API ${url} failed (${res.status}): ${text}`);
   }
 
   return res.json() as Promise<T>;
 }
 
-export async function getTenantContext() {
-  const res = await fetch(`${API_BASE}/v1/tenant/context`, {
-    headers: {
-      Accept: "application/json",
-      "X-Forwarded-Host": TENANT_HOST,
-    },
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) throw new Error("Failed to resolve tenant context");
-  return res.json() as Promise<{
-    tenantId: string;
-    domain: string;
-    slug: string;
-    status: string;
-  }>;
-}
-
 export async function getPublicCategories(): Promise<Category[]> {
-  const data = await apiFetch<{ items: PublicCategory[]; total: number }>(
-    "/v1/public/categories",
+  const data = await publicFetch<{ items: PublicCategory[]; total: number }>(
+    "/public/categories",
   );
   return data.items.map((c) => ({
     id: c.id,
@@ -123,25 +115,27 @@ export async function getPublicCategories(): Promise<Category[]> {
 }
 
 export async function getPublicHomepage() {
-  return apiFetch<PublicHomepage>("/v1/public/homepage");
+  return publicFetch<PublicHomepage>("/public/homepage");
 }
 
 export async function getPublicFeed(opts?: {
   category?: string;
+  date?: string;
   limit?: number;
   offset?: number;
 }) {
   const params = new URLSearchParams();
   if (opts?.category) params.set("category", opts.category);
+  if (opts?.date) params.set("date", opts.date);
   if (opts?.limit) params.set("limit", String(opts.limit));
   if (opts?.offset) params.set("offset", String(opts.offset));
   const qs = params.toString();
-  const data = await apiFetch<{
+  const data = await publicFetch<{
     items: PublicArticleSummary[];
     total: number;
     limit: number;
     offset: number;
-  }>(`/v1/public/feed${qs ? `?${qs}` : ""}`);
+  }>(`/public/feed${qs ? `?${qs}` : ""}`);
   return {
     ...data,
     items: data.items.map((item) => toArticle(item)),
@@ -150,8 +144,8 @@ export async function getPublicFeed(opts?: {
 
 export async function getPublicArticle(slug: string): Promise<Article | null> {
   try {
-    const item = await apiFetch<PublicArticle>(
-      `/v1/public/articles/${encodeURIComponent(slug)}`,
+    const item = await publicFetch<PublicArticle>(
+      `/public/articles/${encodeURIComponent(slug)}`,
     );
     const paragraphs = item.body
       .split(/\n+/)
@@ -164,7 +158,7 @@ export async function getPublicArticle(slug: string): Promise<Article | null> {
 }
 
 export async function getPublicBreaking() {
-  return apiFetch<{
+  return publicFetch<{
     items: {
       id: string;
       title: string;
@@ -172,7 +166,34 @@ export async function getPublicBreaking() {
       publishedAt: string;
       expiresAt: string | null;
     }[];
-  }>("/v1/public/breaking");
+  }>("/public/breaking");
+}
+
+export async function getPublicAds() {
+  return publicFetch<{
+    items: {
+      id: string;
+      name: string;
+      slot: string;
+      linkUrl: string;
+      imagePath: string;
+      width: number | null;
+      height: number | null;
+      startsAt: string;
+      endsAt: string;
+    }[];
+  }>("/public/ads");
+}
+
+export async function recordArticleView(slug: string, visitorId: string) {
+  return publicFetch<{ ok?: boolean }>(
+    `/public/articles/${encodeURIComponent(slug)}/views`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visitorId }),
+    },
+  );
 }
 
 export function getApiConfig() {
