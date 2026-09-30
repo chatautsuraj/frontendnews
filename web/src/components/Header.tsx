@@ -50,7 +50,7 @@ export function Header() {
                 const active =
                   item.href === "/"
                     ? pathname === "/"
-                    : pathname.startsWith(item.href) && item.href !== "#";
+                    : Boolean(item.href) && pathname.startsWith(item.href);
 
                 if (item.children?.length) {
                   return (

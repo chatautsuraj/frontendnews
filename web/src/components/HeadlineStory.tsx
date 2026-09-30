@@ -23,7 +23,7 @@ export function HeadlineStory({ article, showImage = false }: HeadlineStoryProps
         <>
           <div className="mt-3 flex items-center justify-center gap-3">
             <span className="size-9 rounded-full bg-gray-200 overflow-hidden grid place-items-center text-xs font-bold">
-              ख
+              न
             </span>
             <span className="text-sm font-bold text-gray-600">{article.author}</span>
           </div>

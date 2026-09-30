@@ -3,32 +3,68 @@ import { DarkCardGrid } from "@/components/DarkCardGrid";
 import { HeadlineStory } from "@/components/HeadlineStory";
 import { LightCategorySection } from "@/components/LightCategorySection";
 import { VideoSection } from "@/components/VideoSection";
-import { articles, videos } from "@/data/mock";
+import { articles as mockArticles, videos } from "@/data/mock";
+import { getApiConfig, getPublicFeed, getPublicHomepage } from "@/lib/api";
+import type { Article } from "@/lib/types";
 
-export default function Home() {
+async function loadHomeArticles(): Promise<Article[]> {
+  const { hasPortalKey } = getApiConfig();
+  if (!hasPortalKey) return mockArticles;
+
+  try {
+    const homepage = await getPublicHomepage();
+    const fromSections = homepage.sections.flatMap((section) =>
+      section.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.title,
+        body: [item.title],
+        publishedAt: item.publishedAt,
+        category: item.category ?? {
+          id: "uncat",
+          name: "समाचार",
+          slug: "samachar",
+        },
+        author: "The Nagarik",
+        image: item.featuredMedia
+          ? `/api/media/${item.featuredMedia.id}?size=full`
+          : mockArticles[0].image,
+        imageAlt: item.title,
+      })),
+    );
+
+    if (fromSections.length >= 5) return fromSections;
+
+    const feed = await getPublicFeed({ limit: 20 });
+    return feed.items.length ? feed.items : mockArticles;
+  } catch {
+    return mockArticles;
+  }
+}
+
+export default async function Home() {
+  const articles = await loadHomeArticles();
   const [h1, h2, f1, f2, f3, ...rest] = articles;
 
-  const desh = articles.filter((a) => a.category.slug === "desh-charcha").concat(rest);
-  const samsad = articles.filter((a) => a.category.slug === "samsad-ka-kura").concat(articles);
-  const genz = articles.filter((a) => a.category.slug === "gen-z").concat(rest);
-  const purana = articles.filter((a) => a.category.slug === "purana-dal").concat(articles.slice(3));
-  const corporate = articles.filter((a) => a.category.slug === "corporate").concat(rest);
+  const bySlug = (slug: string) =>
+    articles.filter((a) => a.category.slug === slug).concat(rest);
 
   return (
     <>
       <AdBanner variant="exam" />
 
       <div className="container-xl flex flex-col gap-4 mb-4 px-2 md:px-0">
-        <HeadlineStory article={h1} />
-        <HeadlineStory article={h2} />
+        {h1 ? <HeadlineStory article={h1} /> : null}
+        {h2 ? <HeadlineStory article={h2} /> : null}
       </div>
 
       <AdBanner variant="election" />
 
       <div className="container-xl flex flex-col gap-4 mb-4 px-2 md:px-0">
-        <HeadlineStory article={f1} showImage />
-        <HeadlineStory article={f2} showImage />
-        <HeadlineStory article={f3} showImage />
+        {f1 ? <HeadlineStory article={f1} showImage /> : null}
+        {f2 ? <HeadlineStory article={f2} showImage /> : null}
+        {f3 ? <HeadlineStory article={f3} showImage /> : null}
       </div>
 
       <VideoSection items={videos} />
@@ -38,31 +74,31 @@ export default function Home() {
       <DarkCardGrid
         title="सांसदका कुरा"
         href="/category/samsad-ka-kura"
-        articles={samsad}
+        articles={bySlug("samsad-ka-kura")}
       />
 
       <LightCategorySection
         title="देश चर्चा"
         href="/category/desh-charcha"
-        articles={desh}
+        articles={bySlug("desh-charcha")}
       />
 
       <LightCategorySection
         title="जेन-जी खबर"
         href="/category/gen-z"
-        articles={genz}
+        articles={bySlug("gen-z")}
       />
 
       <DarkCardGrid
         title="पूराना दल"
         href="/category/purana-dal"
-        articles={purana}
+        articles={bySlug("purana-dal")}
       />
 
       <LightCategorySection
         title="कर्पोरेट वाच"
         href="/category/corporate"
-        articles={corporate}
+        articles={bySlug("corporate")}
       />
     </>
   );

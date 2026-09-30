@@ -1,19 +1,17 @@
-# Khabar Stories Frontend
+# The Nagarik Frontend
 
-Public news portal UI (Kalopati-inspired layout) for **Khabar Stories**, built with **Next.js App Router**, **TypeScript**, and **Tailwind CSS**.
+Kalopati-inspired public news UI for **The Nagarik** / **द नागरिक** (`thenagarik.com`).
 
-## Status
-
-- Layout clone with mock Nepali content (no API connection yet)
-- Brand: Khabar Stories / खबर स्टोरीज
-- Pages: Home, Category (`/category/[slug]`), Article (`/news/[slug]`)
-
-## Develop
+## Setup
 
 ```bash
-cd web
+cp .env.example .env.local
+# Put the portal public key for thenagarik.com into NEWS_PORTAL_KEY
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Notes
+
+- Without a valid `NEWS_PORTAL_KEY`, pages use mock content.
+- Media is proxied via `/api/media/[id]` using the portal key server-side.

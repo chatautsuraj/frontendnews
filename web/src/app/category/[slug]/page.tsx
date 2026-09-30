@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const category = getCategory(slug);
   return {
-    title: category ? `${category.name} | Khabar Stories` : "श्रेणी",
+    title: category ? `${category.name} | The Nagarik` : "श्रेणी",
   };
 }
 

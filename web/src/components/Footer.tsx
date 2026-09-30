@@ -6,10 +6,10 @@ const linkGroups = [
   {
     title: "लिंकहरू",
     items: [
-      { label: "हाम्रो बारेमा", href: "#" },
-      { label: "सम्पर्क", href: "#" },
-      { label: "गोपनीयता नीति", href: "#" },
-      { label: "सम्पादकीय नीति", href: "#" },
+      { label: "हाम्रो बारेमा", href: "/about" },
+      { label: "सम्पर्क", href: "/contact" },
+      { label: "गोपनीयता नीति", href: "/privacy" },
+      { label: "सम्पादकीय नीति", href: "/editorial-policy" },
     ],
   },
   {
@@ -32,6 +32,14 @@ const linkGroups = [
   },
 ];
 
+const socialLinks = [
+  { label: "f", href: "https://www.facebook.com/", name: "Facebook" },
+  { label: "x", href: "https://x.com/", name: "X" },
+  { label: "tt", href: "https://www.tiktok.com/", name: "TikTok" },
+  { label: "yt", href: "https://www.youtube.com/", name: "YouTube" },
+  { label: "ig", href: "https://www.instagram.com/", name: "Instagram" },
+];
+
 export function Footer() {
   return (
     <footer className="bg-primary text-white mt-10">
@@ -40,23 +48,33 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-primary px-4 py-3 w-full lg:[clip-path:polygon(0%_0%,100%_0,95%_100%,0%_100%)]">
             <span className="text-sm font-semibold">एप डाउनलोड गर्नुहोस्</span>
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-              <span className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2">
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 hover:bg-secondary transition"
+              >
                 Google Play
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2">
+              </Link>
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 hover:bg-secondary transition"
+              >
                 App Store
-              </span>
+              </Link>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 w-full">
             <span className="text-sm font-semibold">सञ्जालमा फलो गर्नुहोस्</span>
-            {["f", "x", "tt", "yt", "ig"].map((label) => (
-              <span
-                key={label}
-                className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-black uppercase text-xs font-bold"
+            {socialLinks.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.name}
+                className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-black uppercase text-xs font-bold hover:bg-primary transition"
               >
-                {label}
-              </span>
+                {item.label}
+              </Link>
             ))}
           </div>
         </div>
@@ -86,7 +104,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 rounded-md bg-ternary px-4 py-3 text-sm md:text-base">
-          सम्पर्क: {site.phone}
+          सम्पर्क: {site.phone} · {site.domain}
         </div>
       </div>
 
@@ -95,7 +113,7 @@ export function Footer() {
           <span>
             Copyright {new Date().getFullYear()} @ {site.nameEn} | All rights reserved
           </span>
-          <span>{site.nameEn}</span>
+          <span>{site.domain}</span>
         </div>
       </div>
     </footer>

@@ -6,7 +6,7 @@ type SectionTitleProps = {
   tone?: "light" | "dark";
 };
 
-export function SectionTitle({ title, href = "#", tone = "dark" }: SectionTitleProps) {
+export function SectionTitle({ title, href = "/", tone = "dark" }: SectionTitleProps) {
   const color = tone === "dark" ? "text-white" : "text-primary";
 
   return (
