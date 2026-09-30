@@ -125,7 +125,10 @@ export default async function ArticlePage({ params }: PageProps) {
           </ul>
 
           <h2 className="font-display text-2xl font-bold mt-8 mb-3 flex items-center gap-2">
-            <span aria-hidden>⚡</span> चर्चित समाचार
+            <svg className="size-5 text-accent-orange" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M13 2L4 14h6l-1 8 10-14h-6l0-6z" />
+            </svg>
+            चर्चित समाचार
           </h2>
           <ul className="divide-y divide-line border-l-2 border-primary pl-3">
             {related.map((item) => (
